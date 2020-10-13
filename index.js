@@ -58,7 +58,7 @@ function createRemReplace (rootValue, unitPrecision, minRemValue) {
     return function (m, $1) {
         if (!$1) return m;
         var rems = parseFloat($1);
-        return rems * 1.6
+        return (rems * 1.6) + 'rem'
         if (rems < minRemValue) return m;
         var fixedVal = toFixed((rems * rootValue), unitPrecision);
         return (fixedVal === 0) ? '0' : fixedVal + 'px';

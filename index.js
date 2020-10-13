@@ -15,7 +15,7 @@ var defaults = {
     minRemValue: 0
 };
 
-module.exports = postcss.plugin('postcss-rem-to-pixel', function (options) {
+module.exports = postcss.plugin('postcss-rem-multiplier', function (options) {
 
     var opts = objectAssign({}, defaults, options);
     var remReplace = createRemReplace(opts.rootValue, opts.unitPrecision, opts.minRemValue);
@@ -58,6 +58,7 @@ function createRemReplace (rootValue, unitPrecision, minRemValue) {
     return function (m, $1) {
         if (!$1) return m;
         var rems = parseFloat($1);
+        return rems * 1.6
         if (rems < minRemValue) return m;
         var fixedVal = toFixed((rems * rootValue), unitPrecision);
         return (fixedVal === 0) ? '0' : fixedVal + 'px';

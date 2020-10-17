@@ -28,8 +28,7 @@
   "keywords": [
     "css",
     "rem",
-    "pixel",
-    "px",
+    "multiplier",
     "postcss",
     "postcss-plugin"
   ],

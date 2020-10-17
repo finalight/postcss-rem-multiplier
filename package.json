@@ -11,10 +11,12 @@
   "bugs": "https://github.com/finalight/postcss-rem-multiplierissues",
   "main": "index.js",
   "scripts": {
-    "test": "jasmine-node spec"
+    "test": "jest",
+    "test:watch": "jest --watch"
   },
   "devDependencies": {
     "jasmine-node": "~1.11.0",
+    "jest": "^26.5.3",
     "postcss-pxtorem": "^4.0.1"
   },
   "keywords": [

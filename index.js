@@ -1,30 +1,29 @@
 'use strict';
 
-var postcss = require('postcss');
-var objectAssign = require('object-assign');
-var remRegex = require('./lib/rem-unit-regex');
-var filterPropList = require('./lib/filter-prop-list');
+const postcss = require('postcss');
+const remRegex = require('./lib/rem-unit-regex');
+const filterPropList = require('./lib/filter-prop-list');
 
-var defaults = {
-    rootValue: 16,
-    unitPrecision: 5,
-    selectorBlackList: [],
-    propList: ['font', 'font-size', 'line-height', 'letter-spacing'],
-    replace: true,
-    mediaQuery: false,
-    minRemValue: 0
-};
+module.exports = postcss.plugin('postcss-rem-multiplier', (options) => {
 
-module.exports = postcss.plugin('postcss-rem-multiplier', function (options) {
+    const defaults = {
+        rootValue: 16,
+        unitPrecision: 5,
+        selectorBlackList: [],
+        propList: ['font', 'font-size', 'line-height', 'letter-spacing'],
+        replace: true,
+        mediaQuery: false,
+        minRemValue: 0
+    };
 
-    var opts = objectAssign({}, defaults, options);
-    var remReplace = createRemReplace(opts.rootValue, opts.unitPrecision, opts.minRemValue);
+    const opts = Object.assign(defaults, options);
+    const remReplace = createRemReplace(opts.rootValue, opts.unitPrecision, opts.minRemValue);
 
-    var satisfyPropList = createPropListMatcher(opts.propList);
+    const satisfyPropList = createPropListMatcher(opts.propList);
 
-    return function (css) {
+    return (css) => {
 
-        css.walkDecls(function (decl, i) {
+        css.walkDecls((decl, i) => {
             // This should be the fastest test and will remove most declarations
             if (decl.value.indexOf('rem') === -1) return;
 
@@ -32,7 +31,7 @@ module.exports = postcss.plugin('postcss-rem-multiplier', function (options) {
 
             if (blacklistedSelector(opts.selectorBlackList, decl.parent.selector)) return;
 
-            var value = decl.value.replace(remRegex, remReplace);
+            const value = decl.value.replace(remRegex, remReplace);
 
             // if px unit already exists, do not add or replace
             if (declarationExists(decl.parent, decl.prop, value)) return;
@@ -45,7 +44,7 @@ module.exports = postcss.plugin('postcss-rem-multiplier', function (options) {
         });
 
         if (opts.mediaQuery) {
-            css.walkAtRules('media', function (rule) {
+            css.walkAtRules('media', (rule) => {
                 if (rule.params.indexOf('rem') === -1) return;
                 rule.params = rule.params.replace(remRegex, remReplace);
             });
@@ -54,30 +53,27 @@ module.exports = postcss.plugin('postcss-rem-multiplier', function (options) {
     };
 });
 
-function createRemReplace (rootValue, unitPrecision, minRemValue) {
+const createRemReplace = (rootValue, unitPrecision, minRemValue) => {
     return function (m, $1) {
         if (!$1) return m;
-        var rems = parseFloat($1);
+        const rems = parseFloat($1);
         return (rems * 1.6) + 'rem'
-        if (rems < minRemValue) return m;
-        var fixedVal = toFixed((rems * rootValue), unitPrecision);
-        return (fixedVal === 0) ? '0' : fixedVal + 'px';
     };
 }
 
-function toFixed(number, precision) {
-    var multiplier = Math.pow(10, precision + 1),
-    wholeNumber = Math.floor(number * multiplier);
+const toFixed = (number, precision) => {
+    const multiplier = Math.pow(10, precision + 1),
+        wholeNumber = Math.floor(number * multiplier);
     return Math.round(wholeNumber / 10) * 10 / multiplier;
 }
 
-function declarationExists(decls, prop, value) {
+const declarationExists = (decls, prop, value) => {
     return decls.some(function (decl) {
         return (decl.prop === prop && decl.value === value);
     });
 }
 
-function blacklistedSelector(blacklist, selector) {
+const blacklistedSelector = (blacklist, selector) => {
     if (typeof selector !== 'string') return;
     return blacklist.some(function (regex) {
         if (typeof regex === 'string') return selector.indexOf(regex) !== -1;
@@ -85,10 +81,10 @@ function blacklistedSelector(blacklist, selector) {
     });
 }
 
-function createPropListMatcher(propList) {
-    var hasWild = propList.indexOf('*') > -1;
-    var matchAll = (hasWild && propList.length === 1);
-    var lists = {
+const createPropListMatcher = (propList) => {
+    const hasWild = propList.indexOf('*') > -1;
+    const matchAll = (hasWild && propList.length === 1);
+    const lists = {
         exact: filterPropList.exact(propList),
         contain: filterPropList.contain(propList),
         startWith: filterPropList.startWith(propList),
@@ -98,7 +94,7 @@ function createPropListMatcher(propList) {
         notStartWith: filterPropList.notStartWith(propList),
         notEndWith: filterPropList.notEndWith(propList)
     };
-    return function (prop) {
+    return (prop) => {
         if (matchAll) return true;
         return (
             (

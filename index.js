@@ -1,6 +1,15 @@
 import postcss from 'postcss';
 import remRegex from './lib/rem-unit-regex';
-import filterPropList from './lib/filter-prop-list';
+import {
+  exact,
+  contain,
+  endWith,
+  startWith,
+  notEndWith,
+  notExact,
+  notStartWith,
+  notContain,
+} from './lib/filter-prop-list';
 
 const createRemReplace = () => {
   return (m, $1) => {
@@ -27,14 +36,14 @@ const createPropListMatcher = (propList) => {
   const hasWild = propList.indexOf('*') > -1;
   const matchAll = hasWild && propList.length === 1;
   const lists = {
-    exact: filterPropList.exact(propList),
-    contain: filterPropList.contain(propList),
-    startWith: filterPropList.startWith(propList),
-    endWith: filterPropList.endWith(propList),
-    notExact: filterPropList.notExact(propList),
-    notContain: filterPropList.notContain(propList),
-    notStartWith: filterPropList.notStartWith(propList),
-    notEndWith: filterPropList.notEndWith(propList),
+    exact: exact(propList),
+    contain: contain(propList),
+    startWith: startWith(propList),
+    endWith: endWith(propList),
+    notExact: notExact(propList),
+    notContain: notContain(propList),
+    notStartWith: notStartWith(propList),
+    notEndWith: notEndWith(propList),
   };
 
   return (prop) => {

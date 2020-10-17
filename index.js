@@ -76,7 +76,7 @@ const createPropListMatcher = (propList) => {
   };
 };
 
-module.exports = postcss.plugin('postcss-rem-multiplier', (options) => {
+module.exports = (options = {}) => {
   const defaults = {
     rootValue: 16,
     unitPrecision: 5,
@@ -120,4 +120,6 @@ module.exports = postcss.plugin('postcss-rem-multiplier', (options) => {
       });
     }
   };
-});
+};
+
+module.exports.postcss = true;

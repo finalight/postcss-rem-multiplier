@@ -1,4 +1,3 @@
-import postcss from 'postcss';
 import remRegex from './lib/rem-unit-regex';
 import {
   exact,

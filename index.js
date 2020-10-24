@@ -10,23 +10,26 @@ import {
   notContain,
 } from './lib/filter-prop-list';
 
-const createRemReplace = () => {
-  return (m, $1) => {
-    if (!$1) return m;
-    return `${$1 * 1.6}rem`;
-  };
+const toFixed = (number, precision) => {
+  const multiplier = 10 ** (precision + 1);
+  const wholeNumber = Math.floor(number * multiplier);
+  return (Math.round(wholeNumber / 10) * 10) / multiplier;
 };
 
-const declarationExists = (decls, prop, value) => {
-  return decls.some((decl) => {
-    return decl.prop === prop && decl.value === value;
-  });
+const createRemReplace = (multiplier, unitPrecision) => {
+  return (m, $1) => {
+    if (!$1) return m;
+    const value = toFixed(`${$1 * multiplier}`, unitPrecision);
+    return `${value}rem`;
+  };
 };
 
 const blacklistedSelector = (blacklist, selector) => {
   if (typeof selector !== 'string') return null;
   return blacklist.some((regex) => {
-    if (typeof regex === 'string') return selector.indexOf(regex) !== -1;
+    if (typeof regex === 'string') {
+      return selector.indexOf(regex) !== -1;
+    }
     return selector.match(regex);
   });
 };
@@ -77,39 +80,32 @@ const createPropListMatcher = (propList) => {
 
 module.exports = (options = {}) => {
   const defaults = {
-    rootValue: 16,
-    unitPrecision: 5,
     selectorBlackList: [],
     propList: ['font', 'font-size', 'line-height', 'letter-spacing'],
-    replace: true,
     mediaQuery: false,
-    minRemValue: 0,
+    multiplier: 1,
+    unitPrecision: 5,
   };
 
-  const opts = Object.assign(defaults, options);
-  const remReplace = createRemReplace(opts.rootValue, opts.unitPrecision, opts.minRemValue);
+  const opts = { ...defaults, ...options };
+  const remReplace = createRemReplace(opts.multiplier, opts.unitPrecision);
 
   const satisfyPropList = createPropListMatcher(opts.propList);
 
   return (css) => {
     css.walkDecls((decl, i) => {
       // This should be the fastest test and will remove most declarations
-      if (decl.value.indexOf('rem') === -1) return;
 
-      if (!satisfyPropList(decl.prop)) return;
-
-      if (blacklistedSelector(opts.selectorBlackList, decl.parent.selector)) return;
+      if (
+        decl.value.indexOf('rem') === -1 ||
+        !satisfyPropList(decl.prop) ||
+        blacklistedSelector(opts.selectorBlackList, decl.parent.selector)
+      ) {
+        return;
+      }
 
       const value = decl.value.replace(remRegex, remReplace);
-
-      // if px unit already exists, do not add or replace
-      if (declarationExists(decl.parent, decl.prop, value)) return;
-
-      if (opts.replace) {
-        decl.value = value;
-      } else {
-        decl.parent.insertAfter(i, decl.clone({ value }));
-      }
+      decl.value = value;
     });
 
     if (opts.mediaQuery) {

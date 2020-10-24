@@ -8,7 +8,6 @@
 import postcss from 'postcss';
 import remToPx from '.';
 
-const basicCSS = '.rule { font-size: 0.9375rem }';
 const filterPropList = require('./lib/filter-prop-list');
 
 describe('rem multiplier', () => {

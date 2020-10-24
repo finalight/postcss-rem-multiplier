@@ -1,8 +1,3 @@
-// Jasmine unit tests
-// To run tests, run these commands from the project root:
-// 1. `npm install -g jasmine-node`
-// 2. `jasmine-node spec`
-
 /* global describe, it, expect */
 
 import postcss from 'postcss';
